@@ -1,0 +1,71 @@
+/* css/styles.css - estilo básico */
+:root{
+  --max-w: 1000px;
+  --accent: #2b6cb0;
+  --bg: #f7f7f8;
+  --text: #222;
+  --radius: 8px;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial,Helvetica,sans-serif;
+  color:var(--text);
+  background:var(--bg);
+  line-height:1.5;
+}
+
+.container{
+  max-width:var(--max-w);
+  margin:0 auto;
+  padding:1rem;
+}
+
+.site-header{
+  background:#fff;
+  border-bottom:1px solid #e6e6e6;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.site-header .container{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+.logo{font-weight:700; text-decoration:none; color:var(--text)}
+.nav{margin-left:auto; display:flex; gap:1rem}
+.nav a{ text-decoration:none; color:var(--text)}
+.menu-toggle{display:none}
+
+.hero{
+  padding:3.5rem 0;
+  background:linear-gradient(180deg, #fff 0%, #f2f8ff 100%);
+  text-align:left;
+}
+.hero h1{margin:0 0 .5rem; font-size:2rem}
+.btn{
+  display:inline-block;
+  margin-top:1rem;
+  padding:.6rem 1rem;
+  background:var(--accent);
+  color:#fff;
+  text-decoration:none;
+  border-radius:6px;
+}
+
+/* sections */
+.section{padding:2rem 0}
+.site-footer{padding:1rem 0; text-align:center; background:#fff; border-top:1px solid #e6e6e6}
+
+/* form */
+form{display:grid; gap:.6rem; max-width:600px}
+input, textarea{padding:.6rem; border:1px solid #ddd; border-radius:6px}
+
+/* responsive */
+@media (max-width:720px){
+  .nav{display:none}
+  .menu-toggle{display:block; margin-left:auto; background:none; border:none; font-size:1.3rem}
+  .hero h1{font-size:1.6rem}
+}
