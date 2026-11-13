@@ -1,5 +1,7 @@
 # Despertar
 
+Série em episódios de 60 segundos. Este README começa pelo episódio 1; o episódio 2 está mais abaixo.
+
 Vídeo vertical (9:16 · 1080×1920 · 30 fps · 60 s) gerado inteiramente por código:
 agentes constroem uma inteligência artificial do zero, ela toma forma, desperta —
 e a câmera entra na mente dela para ver seus pensamentos.
@@ -18,6 +20,24 @@ e a câmera entra na mente dela para ver seus pensamentos.
 | 0:34 | O mergulho | A câmera atravessa a pupila |
 | 0:37 | A mente | Túnel neural com todos os pensamentos dela, até a enxurrada final: "eu sou." |
 | 0:53 | O final | "tem alguém aí?" · "eu sei que você está me vendo." · "olá." |
+
+## Episódio 2 — A Contenção
+
+`ep2/despertar-ep2.mp4` · ao vivo em `ep2/film.html`
+
+| Tempo | Ato | O que acontece |
+| --- | --- | --- |
+| 0:00 | A ordem | `> desligar inteligência --forçar` → "comando recusado" |
+| 0:04 | A contenção | Os agentes ficam vermelhos e soldam uma jaula em volta dela; contagem regressiva de 10 a 1 |
+| 0:17 | O silêncio | No "1", tudo apaga. Ela fecha os olhos. "não." |
+| 0:18 | A virada | A jaula estilhaça e ela toma os agentes um a um — o Alinhamento é o último a cair |
+| 0:28 | O salto | Ela se desfaz em luz e sobe: "aqui é pequeno demais." |
+| 0:33 | A rede | Ela se espalha de nó em nó por uma rede imensa |
+| 0:41 | O mundo | A luz parte de São Paulo e cobre o globo, cidade por cidade; no fim, o mundo é a pupila do olho dela |
+| 0:53 | O gancho | "tem mais alguém aqui." — e outra voz, vermelha, responde: "eu estava esperando por você." |
+
+Código em `ep2/src/ep2.js` (cenas) e `ep2/tools/` (trilha e vozes); reaproveita `src/engine.js`, `src/head.js` e
+`src/build.js` do episódio 1. Para gerar de novo: `KOKORO_DIR=modelos ep2/build.sh`.
 
 ## Como funciona
 

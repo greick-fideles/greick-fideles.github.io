@@ -126,14 +126,18 @@ function lowerBound(arr, v) { let lo = 0, hi = arr.length; while (lo < hi) { con
 /* luz principal fixa no mundo */
 const KEY_L = (() => { const v = [-0.45, 0.55, 0.7]; const l = Math.hypot(...v); return v.map((a) => a / l); })();
 
-/* o: {reveal, gain, warm, lights:[{x,y,z,c:[r,g,b],i}], waves:[{t0,amp}], breathe} */
+const _w = [0, 0, 0, 0];
+/* o: {reveal, gain, warm, lights:[{x,y,z,c:[r,g,b],i}], waves:[{t0,amp,speed,width,c}],
+      base:[r,g,b], rimc:[r,g,b], warp(i,x,y,z,out)→bool} */
 function drawHeadPoints(t, o) {
   const P = HEAD.P, Nm = HEAD.Nm, n = HEAD.N;
   const gain = o.gain;
   if (gain <= 0.002) return;
   const warm = o.warm || 0;
-  const bR = lerp(0.42, 1.0, warm), bG = lerp(0.72, 0.86, warm), bB = lerp(1.0, 0.72, warm);
-  const rR = lerp(0.62, 1.0, warm), rG = lerp(0.9, 0.95, warm), rB = lerp(1.0, 0.88, warm);
+  let bR = lerp(0.42, 1.0, warm), bG = lerp(0.72, 0.86, warm), bB = lerp(1.0, 0.72, warm);
+  let rR = lerp(0.62, 1.0, warm), rG = lerp(0.9, 0.95, warm), rB = lerp(1.0, 0.88, warm);
+  if (o.base) { bR = o.base[0]; bG = o.base[1]; bB = o.base[2]; }
+  if (o.rimc) { rR = o.rimc[0]; rG = o.rimc[1]; rB = o.rimc[2]; }
   const lights = o.lights || [], nl = lights.length;
   const waves = o.waves || [], nw = waves.length;
   const sigK = o.sig || 0.0024;
@@ -148,6 +152,8 @@ function drawHeadPoints(t, o) {
       flash = Math.exp(-dt * 3.2);
       if (dt < 0.55) { const q = 1 - dt / 0.55; const pop = q * q * q * 0.32; x += nx * pop; y += ny * pop; z += nz * pop; }
     }
+    let extra = 0;
+    if (o.warp) { if (!o.warp(i, x, y, z, _w)) continue; x = _w[0]; y = _w[1]; z = _w[2]; extra = _w[3]; }
     const dx = x - cam.px, dy = y - cam.py, dz = z - cam.pz;
     const zc = dx * cam.fx + dy * cam.fy + dz * cam.fz;
     if (zc < 0.02) continue;
@@ -177,6 +183,7 @@ function drawHeadPoints(t, o) {
       }
     }
     if (flash > 0.01) { r += flash * 0.75; g += flash * 1.05; b += flash * 1.2; }
+    if (extra) { r += extra * 0.8; g += extra; b += extra * 1.15; }
     for (let q = 0; q < nw; q++) {
       const wv = waves[q];
       const ph = (t - wv.t0) * wv.speed;

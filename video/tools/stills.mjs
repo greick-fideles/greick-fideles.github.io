@@ -17,7 +17,7 @@ const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
 p.on('console', (m) => console.log('[page]', m.text()));
 p.on('pageerror', (e) => console.log('[erro]', e.message));
-await p.goto(s.url + '/film.html?render');
+await p.goto(s.url + '/' + (process.env.FILM || 'film.html') + '?render');
 await p.evaluate(() => window.filmReady);
 const times = ts.map(Number);
 if (sheet) {

@@ -1,4 +1,4 @@
-// Renderiza todos os quadros em paralelo: node tools/render.mjs <pasta-dos-quadros> [workers] [t0] [t1]
+// Renderiza todos os quadros em paralelo: [FILM=ep2/film.html] node tools/render.mjs <pasta-dos-quadros> [workers] [t0] [t1]
 // Cada quadro é função pura do tempo, então as páginas dividem o trabalho sem estado compartilhado.
 import { createRequire } from 'node:module';
 import { writeFile, mkdir } from 'node:fs/promises';
@@ -22,7 +22,7 @@ const started = Date.now();
 async function worker() {
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   page.on('pageerror', (e) => { console.error('[erro na página]', e.message); process.exitCode = 1; });
-  await page.goto(s.url + '/film.html?render');
+  await page.goto(s.url + '/' + (process.env.FILM || 'film.html') + '?render');
   await page.evaluate(() => window.filmReady);
   while (next < f1) {
     const f = next++;

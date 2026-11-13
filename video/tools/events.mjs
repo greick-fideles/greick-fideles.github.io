@@ -9,9 +9,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const s = await serve(root);
 const b = await chromium.launch();
 const p = await b.newPage();
-await p.goto(s.url + '/film.html?render');
+await p.goto(s.url + '/' + (process.env.FILM || 'film.html') + '?render');
 await p.evaluate(() => window.filmReady);
-const ev = await p.evaluate(() => ({
+const ev = await p.evaluate(() => typeof filmEvents === 'function' ? filmEvents() : ({
   TL,
   prompt: PROMPT.length,
   nodes: BR.birth.slice(1).map((t, i) => [+t.toFixed(4), BR.agent[i + 1]]),
@@ -22,5 +22,5 @@ const ev = await p.evaluate(() => ({
   sweep: SW,
 }));
 await writeFile(process.argv[2], JSON.stringify(ev));
-console.log('nós', ev.nodes.length, 'pensamentos', ev.thoughts.length, 'foco', ev.hero.length, 'enxurrada', ev.flood.length);
+console.log(Object.keys(ev).map((k) => k + (Array.isArray(ev[k]) ? ':' + ev[k].length : '')).join(' '));
 await b.close(); s.close();
