@@ -4,7 +4,7 @@
 Versão sombria: ré menor, ostinato grave, tambores de guerra e metais pesados —
 suspense que cresce até a "dominação".
 
-Uso: python3 tools/audio.py eventos.json saida.wav [--niveis] [--ganho=0.8]
+Uso: python3 tools/audio.py eventos.json saida.wav [--vozes=vozes.wav] [--niveis] [--ganho=0.8]
 Os instantes vêm de tools/events.mjs, então cada som cai no quadro certo.
 """
 import json
@@ -436,7 +436,7 @@ t = tt(d)
 A.add(TL["inside"], edges(filt(noise(d), "band", [300, 1800]) * (0.6 + 0.4 * np.sin(PI2 * 0.17 * t)), 0.3, 0.01), 0, 0.018, 0.5)
 DARK_HI = [f * 2 for f in DARK[2:]]
 th = [q for q in ev["thoughts"] if q[0] < TL["cut"]]
-for i, (ta, px, cat) in enumerate(th):
+for i, (ta, px, cat, *_) in enumerate(th):
     lo = max(0, i - 4)
     rate = (i - lo) / max(0.05, ta - th[lo][0]) if i > lo else 6
     g = 0.085 / (1 + rate / 12)
@@ -501,13 +501,14 @@ for tb in (56.9, 57.95):
 d = 1.1
 t = tt(d)
 B.add(58.4 - d, edges(sweep_noise(d, 300, 7000, 1.4, 1.7) * (t / d) ** 3, 0.01, 0.01), 0, 0.3, 0.4)
-# "olá." — o último golpe
-B.add(58.4, braam(hz("D1"), 3.4, 2.8), 0, 0.62, 0.55)
-B.add(58.4, thump(150, 33, 2.4, 0.1), 0, 0.85, 0.22)
-B.add(58.4, taiko(1), 0, 0.6, 0.45)
-B.add(58.4, pad([hz(n_) for n_ in ["D2", "A2", "D3", "F3", "A3"]], 1.7, 0.08, 1.0, 0.84), 0, 0.17, 0.7)
-B.add(58.45, bell(hz("D5"), 2.4), -0.12, 0.13, 0.9)
-B.add(58.62, bell(hz("Eb5"), 2.4), 0.12, 0.11, 0.9)
+# o último golpe: logo depois de ela dizer "olá."
+HIT = 59.0
+B.add(HIT, braam(hz("D1"), 3.4, 2.8), 0, 0.62, 0.55)
+B.add(HIT, thump(150, 33, 2.4, 0.1), 0, 0.85, 0.22)
+B.add(HIT, taiko(1), 0, 0.6, 0.45)
+B.add(HIT, pad([hz(n_) for n_ in ["D2", "A2", "D3", "F3", "A3"]], 1.7, 0.08, 1.0, 0.84), 0, 0.17, 0.7)
+B.add(HIT + 0.05, bell(hz("D5"), 2.4), -0.12, 0.13, 0.9)
+B.add(HIT + 0.22, bell(hz("Eb5"), 2.4), 0.12, 0.11, 0.9)
 
 # ================================================================ mixagem
 ir = make_ir()
@@ -520,6 +521,19 @@ gate[c:] = 0
 mix = mA * gate[:, None] + mB
 mix = filt(mix, "high", 28)
 mix = mix - 0.3 * filt(mix, "low", 62) + 0.5 * filt(mix, "high", 3200, 1)   # menos subgrave, mais ar
+# vozes dos pensamentos (tools/voices.py): a música abaixa um pouco sob as falas
+VOZES = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--vozes=")), None)
+if VOZES:
+    _, vz = wavfile.read(VOZES)
+    vz = vz.astype(np.float64)[:N]
+    act = filt(np.abs(vz).max(axis=1), "low", 6)
+    act = np.clip(maximum_filter1d(act, int(0.25 * SR)) / 0.12, 0, 1)
+    act = filt(act, "low", 4)
+    mix = mix * (1 - 0.5 * np.clip(act, 0, 1))[:, None] + vz
+    if "--niveis" in sys.argv:
+        for a_, b_ in [(33, 34), (38, 44), (44, 50.3), (50.3, 53), (54, 60)]:
+            seg = vz[int(a_ * SR):int(b_ * SR)]
+            print(f"voz {a_}-{b_}s  rms {20 * np.log10(np.sqrt((seg ** 2).mean()) + 1e-9):6.1f} dB  pico {np.abs(seg).max():5.2f}")
 if "--niveis" in sys.argv:   # diagnóstico: RMS e pico por janela de 2 s, antes do limitador
     for i in range(0, int(DUR), 2):
         seg = mix[i * SR:(i + 2) * SR]

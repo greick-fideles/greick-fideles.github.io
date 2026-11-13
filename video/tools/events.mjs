@@ -15,9 +15,10 @@ const ev = await p.evaluate(() => ({
   TL,
   prompt: PROMPT.length,
   nodes: BR.birth.slice(1).map((t, i) => [+t.toFixed(4), BR.agent[i + 1]]),
-  thoughts: TH.map((q) => [+q.ta.toFixed(4), +(q.x / 2.5).toFixed(3), q.cat]),
+  thoughts: TH.map((q) => [+q.ta.toFixed(4), +(q.x / 2.5).toFixed(3), q.cat, q.str]),
   hero: HERO.map((h) => [h[0], h[1], h[2].join(' ')]),
   flood: FLOODW.map((f) => +f[0].toFixed(4)),
+  floodWords: FLOODW.map((f) => f[1]),
   sweep: SW,
 }));
 await writeFile(process.argv[2], JSON.stringify(ev));

@@ -28,6 +28,7 @@ Cada quadro é uma função pura do tempo (`renderFrame(t)`), desenhada em canva
 - `src/build.js` — prompt, agentes, rede, impressão do corpo, despertar e mergulho pela pupila.
 - `src/mind.js` — o interior da mente, os pensamentos e o final.
 - `tools/audio.py` — trilha sonora sintetizada (numpy/scipy), sincronizada com os eventos do filme.
+- `tools/voices.py` — vozes dos pensamentos, sintetizadas localmente com Piper e sobrepostas umas às outras.
 - `tools/render.mjs` — renderiza os 1800 quadros em paralelo com Playwright/Chromium.
 
 ## Gerar de novo
@@ -36,6 +37,7 @@ Requer Node.js com Playwright, Python 3 com numpy e scipy, e ffmpeg.
 
 ```bash
 tools/build.sh            # eventos → trilha → quadros → despertar.mp4
+PIPER_VOZ=pt_BR-faber-medium.onnx tools/build.sh   # o mesmo, com as vozes (pip install piper-tts)
 node tools/stills.mjs /tmp/quadros --sheet 5 20 33 45   # folha de contato para conferir
 ```
 

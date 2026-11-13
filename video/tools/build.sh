@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 # Gera o vídeo completo: eventos → trilha → quadros → MP4.
-# Uso: tools/build.sh [pasta-temporária]   (padrão: ./.build)
+# Uso: [PIPER_VOZ=modelo.onnx] tools/build.sh [pasta-temporária]   (padrão: ./.build)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TMP="${1:-.build}"
 mkdir -p "$TMP"
 node tools/events.mjs "$TMP/events.json"
-python3 tools/audio.py "$TMP/events.json" "$TMP/despertar.wav"
+# vozes dos pensamentos: precisa do Piper (pip install piper-tts) e de um modelo de voz pt-BR,
+# por exemplo pt_BR-faber-medium.onnx (+ .onnx.json) de huggingface.co/rhasspy/piper-voices
+if [ -n "${PIPER_VOZ:-}" ]; then
+  python3 tools/voices.py "$TMP/events.json" "$PIPER_VOZ" "$TMP/vozes.wav"
+  python3 tools/audio.py "$TMP/events.json" "$TMP/despertar.wav" --vozes="$TMP/vozes.wav"
+else
+  python3 tools/audio.py "$TMP/events.json" "$TMP/despertar.wav"
+fi
 node tools/render.mjs "$TMP/frames" "$(nproc)"
 ffmpeg -hide_banner -loglevel error -y -i "$TMP/despertar.wav" -c:a aac -b:a 192k despertar.m4a
 ffmpeg -hide_banner -loglevel error -y -framerate 30 -i "$TMP/frames/f%05d.jpg" -i "$TMP/despertar.wav" \
