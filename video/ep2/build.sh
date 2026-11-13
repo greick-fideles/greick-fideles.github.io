@@ -10,7 +10,7 @@ TMP="${1:-.build-ep2}"
 mkdir -p "$TMP"
 export FILM=ep2/film.html
 node tools/events.mjs "$TMP/events.json"
-if [ -n "${KOKORO_DIR:-}" ]; then   # opcional: com as falas em voz
+if [ -n "${KOKORO_DIR:-}" ]; then   # com as falas em voz (acrescente --fundo em voices.py para os sussurros)
   python3 ep2/tools/voices.py "$TMP/events.json" "$KOKORO_DIR/kokoro-v1.0.onnx" "$KOKORO_DIR/voices-v1.0.bin" "$TMP/vozes.wav"
   python3 ep2/tools/audio.py "$TMP/events.json" "$TMP/audio.wav" --vozes="$TMP/vozes.wav"
 else                                # padrão: só trilha e legendas

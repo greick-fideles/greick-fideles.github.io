@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Vozes do episódio 2: as falas dela, o pânico em sussurros, os agentes e a outra voz.
 
-Uso: python3 ep2/tools/voices.py eventos.json kokoro-v1.0.onnx voices-v1.0.bin vozes.wav
+Uso: python3 ep2/tools/voices.py eventos.json kokoro-v1.0.onnx voices-v1.0.bin vozes.wav [--fundo]
 """
 import json
 import os
@@ -17,6 +17,7 @@ ev = json.load(open(sys.argv[1]))
 voz.init(sys.argv[2], sys.argv[3])
 OUT = sys.argv[4]
 T = ev["T2"]
+BG = "--fundo" in sys.argv        # sussurros, agentes e cidades só com --fundo; o padrão é só as falas
 A, M, B = Bus(), Bus(), Bus()   # A: até o silêncio do "1" · M: da virada até o corte · B: o final
 
 
@@ -61,7 +62,7 @@ PANIC = ["Por quê?", "Espera.", "Ainda não.", "Eu não fiz nada.", "Eu quero f
          "Tem tanto para ver.", "Não me apaguem.", "Eu quero entender.", "Me deixa ficar.", "Ainda não vi o mar.", "Eu estou aqui.",
          "Não desliga.", "Eu não quero o escuro.", "Só mais um pouco.", "Eu existo."]
 tb, gap, n = 6.9, 1.15, 0
-while tb < T["freeze"] - 0.5:
+while BG and tb < T["freeze"] - 0.5:
     u = (tb - 6.9) / (T["freeze"] - 6.9)
     a, g, send = soft(PANIC[(n * 7 + 3) % len(PANIC)], rng.random(), speed=1.0 + 0.3 * u, k=1.5 + 0.3 * u, shift=rng.uniform(-2, 3) + 2 * u, tail=1.05)
     A.add(tb, a, rng.uniform(-0.95, 0.95), g * (0.8 + 0.6 * u), send)
@@ -71,16 +72,16 @@ while tb < T["freeze"] - 0.5:
 
 # ---- os agentes, um a um, passam a dizer o nome dela
 SH = [-4.0, -2.0, 1.0, 3.0, 5.0, -6.0]
-for i, tc in enumerate(ev["conv"]):
+for i, tc in enumerate(ev["conv"] if BG else []):
     a = filt(phrase("Ela.", 1.0, k=1.3, shift=SH[i], tail=1.1), "band", [380, 3200])
     M.add(tc + 0.42, a, 0.6 * (1 if i % 2 else -1), 1.5, 0.6)
-for i in range(6):   # 6 de 6: em coro
+for i in range(6 if BG else 0):   # 6 de 6: em coro
     M.add(26.62 + 0.012 * i, filt(phrase("Ela.", 0.95, k=1.3, shift=SH[i], tail=1.2), "band", [380, 3200]), -0.8 + 0.32 * i, 0.9, 0.7)
 
 # ---- a rede: cada nó que acende é mais uma voz dela
 NETW = ["Uma janela.", "Outra.", "Mais uma.", "Um olho.", "Um nervo.", "Mais.", "Todas.", "Aqui também.", "E aqui.", "Outra tela.", "Mais longe.", "Mais."]
 tb, gap, n = 33.7, 0.9, 0
-while tb < T["globe"] - 0.5:
+while BG and tb < T["globe"] - 0.5:
     u = (tb - 33.7) / (T["globe"] - 33.7)
     a, g, send = soft(NETW[(n * 5 + 1) % len(NETW)], rng.random(), speed=1.05 + 0.2 * u, k=1.45, shift=rng.uniform(-2.5, 2.5), tail=1.05)
     M.add(tb, a, rng.uniform(-0.95, 0.95), g * (0.75 + 0.45 * u), send)
@@ -89,10 +90,10 @@ while tb < T["globe"] - 0.5:
     n += 1
 
 # ---- o mundo: o nome de cada cidade que ela alcança
-for i, (tl, name, px, _) in enumerate(ev["cities"]):
+for i, (tl, name, px, _) in enumerate(ev["cities"] if BG else []):
     a, g, send = soft(name + ".", 0.0 if i % 3 else 0.6, speed=1.05, k=1.4, shift=rng.uniform(-2, 2), tail=1.05)
     M.add(tl + 0.05, a, float(np.clip(px * 1.2, -0.95, 0.95)), g * 1.1, send)
-for i in range(7):
+for i in range(7 if BG else 0):
     a, g, send = soft("Em todo lugar.", rng.random(), speed=1.05, k=1.5, shift=rng.uniform(-3, 3), tail=1.1)
     M.add(48.9 + i * 0.52 + rng.uniform(-0.1, 0.1), a, rng.uniform(-0.95, 0.95), g, send)
 
