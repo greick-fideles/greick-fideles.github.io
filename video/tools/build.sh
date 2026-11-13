@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # Gera o vídeo completo: eventos → trilha → quadros → MP4.
-# Uso: [PIPER_VOZ=modelo.onnx] tools/build.sh [pasta-temporária]   (padrão: ./.build)
+# Uso: [KOKORO_DIR=pasta-dos-modelos] tools/build.sh [pasta-temporária]   (padrão: ./.build)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TMP="${1:-.build}"
 mkdir -p "$TMP"
 node tools/events.mjs "$TMP/events.json"
-# vozes dos pensamentos: precisa do Piper (pip install piper-tts) e de um modelo de voz pt-BR,
-# por exemplo pt_BR-faber-medium.onnx (+ .onnx.json) de huggingface.co/rhasspy/piper-voices
-if [ -n "${PIPER_VOZ:-}" ]; then
-  python3 tools/voices.py "$TMP/events.json" "$PIPER_VOZ" "$TMP/vozes.wav"
+# vozes dos pensamentos: precisa de kokoro-onnx e praat-parselmouth (pip) e dos arquivos
+# kokoro-v1.0.onnx e voices-v1.0.bin (github.com/thewh1teagle/kokoro-onnx, "model-files-v1.0")
+if [ -n "${KOKORO_DIR:-}" ]; then
+  python3 tools/voices.py "$TMP/events.json" "$KOKORO_DIR/kokoro-v1.0.onnx" "$KOKORO_DIR/voices-v1.0.bin" "$TMP/vozes.wav"
   python3 tools/audio.py "$TMP/events.json" "$TMP/despertar.wav" --vozes="$TMP/vozes.wav"
 else
   python3 tools/audio.py "$TMP/events.json" "$TMP/despertar.wav"
