@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
-# Gera o episódio 2 completo: eventos → vozes → trilha → quadros → MP4.
-# Uso: KOKORO_DIR=pasta-dos-modelos ep2/build.sh [pasta-temporária]   (padrão: ./.build-ep2)
-# Precisa de: Node + Playwright, ffmpeg, Python com numpy, scipy, kokoro-onnx e praat-parselmouth,
-# e dos arquivos kokoro-v1.0.onnx e voices-v1.0.bin (github.com/thewh1teagle/kokoro-onnx, "model-files-v1.0").
+# Gera o episódio 2 completo: eventos → trilha → quadros → MP4 (falas só em legenda).
+# Uso: ep2/build.sh [pasta-temporária]   (padrão: ./.build-ep2)
+# Precisa de: Node + Playwright, ffmpeg e Python com numpy e scipy.
+# Para a versão com as falas em voz: KOKORO_DIR=pasta-dos-modelos ep2/build.sh — aí precisa também de
+# kokoro-onnx e praat-parselmouth, e de kokoro-v1.0.onnx e voices-v1.0.bin (github.com/thewh1teagle/kokoro-onnx).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TMP="${1:-.build-ep2}"
 mkdir -p "$TMP"
 export FILM=ep2/film.html
 node tools/events.mjs "$TMP/events.json"
-python3 ep2/tools/voices.py "$TMP/events.json" "$KOKORO_DIR/kokoro-v1.0.onnx" "$KOKORO_DIR/voices-v1.0.bin" "$TMP/vozes.wav"
-python3 ep2/tools/audio.py "$TMP/events.json" "$TMP/audio.wav" --vozes="$TMP/vozes.wav"
+if [ -n "${KOKORO_DIR:-}" ]; then   # opcional: com as falas em voz
+  python3 ep2/tools/voices.py "$TMP/events.json" "$KOKORO_DIR/kokoro-v1.0.onnx" "$KOKORO_DIR/voices-v1.0.bin" "$TMP/vozes.wav"
+  python3 ep2/tools/audio.py "$TMP/events.json" "$TMP/audio.wav" --vozes="$TMP/vozes.wav"
+else                                # padrão: só trilha e legendas
+  python3 ep2/tools/audio.py "$TMP/events.json" "$TMP/audio.wav"
+fi
 node tools/render.mjs "$TMP/frames" "$(nproc)"
 ffmpeg -hide_banner -loglevel error -y -i "$TMP/audio.wav" -c:a aac -b:a 192k ep2/despertar-ep2.m4a
 ffmpeg -hide_banner -loglevel error -y -framerate 30 -i "$TMP/frames/f%05d.jpg" -i "$TMP/audio.wav" \

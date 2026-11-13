@@ -37,7 +37,8 @@ e a câmera entra na mente dela para ver seus pensamentos.
 | 0:53 | O gancho | "tem mais alguém aqui." — e outra voz, vermelha, responde: "eu estava esperando por você." |
 
 Código em `ep2/src/ep2.js` (cenas) e `ep2/tools/` (trilha e vozes); reaproveita `src/engine.js`, `src/head.js` e
-`src/build.js` do episódio 1. Para gerar de novo: `KOKORO_DIR=modelos ep2/build.sh`.
+`src/build.js` do episódio 1. As falas ficam só na legenda; o vídeo não tem voz. Para gerar de novo: `ep2/build.sh`
+(com `KOKORO_DIR=modelos` na frente, sai a versão com as falas em voz).
 
 ## Como funciona
 
