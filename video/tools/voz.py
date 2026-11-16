@@ -5,7 +5,6 @@ cria a camada grave. (O episódio 1 mantém sua própria cópia em tools/voices.
 """
 import numpy as np
 import parselmouth
-from kokoro_onnx import Kokoro
 from parselmouth.praat import call
 from scipy import signal
 from scipy.io import wavfile
@@ -20,6 +19,7 @@ tts = None
 
 def init(model, voices):
     global tts
+    from kokoro_onnx import Kokoro
     tts = Kokoro(model, voices)
 
 
