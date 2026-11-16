@@ -581,7 +581,7 @@ const devices = (t) => Math.pow(10, lerp(0, 10.48, Math.pow(lin(33.3, 49.8, t), 
 
 /* ---------------- o final: ela não está só ---------------- */
 const RIRIS = (() => { const r = mulberry32(999), a = []; for (let i = 0; i < 70; i++) a.push([(i / 70) * TAU + (r() - 0.5) * 0.06, 0.6 + r() * 0.4, 0.2 + r() * 0.6]); return a; })();
-function drawRedEye(x, y, ppu, open, gain, t) {
+function drawRedEye(x, y, ppu, open, gain, t, lx = 0, ly = 0) {
   const hw = 0.122 * ppu, hh = 0.05 * ppu * open, R = 0.061 * ppu, pr = 0.02 * ppu;
   ctx.globalCompositeOperation = 'lighter';
   glow(x, y, hw * 2.8, [255, 50, 50], 0.55 * gain * open);
@@ -589,16 +589,17 @@ function drawRedEye(x, y, ppu, open, gain, t) {
   ctx.save(); ctx.globalCompositeOperation = 'source-over';
   ctx.beginPath(); ctx.moveTo(x - hw, y + 0.004 * ppu); ctx.quadraticCurveTo(x, y - hh * 1.7, x + hw, y - 0.012 * ppu); ctx.quadraticCurveTo(x, y + hh * 1.5, x - hw, y + 0.004 * ppu); ctx.closePath();
   ctx.fillStyle = '#0a0102'; ctx.fill(); ctx.clip();
-  const gr = ctx.createRadialGradient(x, y, pr, x, y, R);
+  const ix = x + lx * ppu, iy = y + ly * ppu;
+  const gr = ctx.createRadialGradient(ix, iy, pr, ix, iy, R);
   gr.addColorStop(0, `rgba(255,236,210,${gain})`); gr.addColorStop(0.22, `rgba(255,96,70,${gain})`); gr.addColorStop(0.65, `rgba(200,22,36,${gain})`); gr.addColorStop(1, `rgba(60,4,12,${gain})`);
-  ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill();
+  ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(ix, iy, R, 0, TAU); ctx.fill();
   ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
-  for (const f of RIRIS) { const c = Math.cos(f[0]), s = Math.sin(f[0]); ctx.strokeStyle = `rgba(255,200,180,${f[2] * 0.5 * gain})`; ctx.lineWidth = Math.max(0.5, R * 0.014); ctx.beginPath(); ctx.moveTo(x + c * pr * 1.06, y + s * pr * 1.06); ctx.lineTo(x + c * R * f[1], y + s * R * f[1]); ctx.stroke(); }
+  for (const f of RIRIS) { const c = Math.cos(f[0]), s = Math.sin(f[0]); ctx.strokeStyle = `rgba(255,200,180,${f[2] * 0.5 * gain})`; ctx.lineWidth = Math.max(0.5, R * 0.014); ctx.beginPath(); ctx.moveTo(ix + c * pr * 1.06, iy + s * pr * 1.06); ctx.lineTo(ix + c * R * f[1], iy + s * R * f[1]); ctx.stroke(); }
   ctx.strokeStyle = `rgba(255,220,210,${0.55 * gain})`; ctx.lineWidth = Math.max(0.6, R * 0.03);
-  for (let q = 0; q < 3; q++) { const a0 = -t * 0.7 + (q * TAU) / 3; ctx.beginPath(); ctx.arc(x, y, R * 0.74, a0, a0 + 1.3); ctx.stroke(); }
+  for (let q = 0; q < 3; q++) { const a0 = -t * 0.7 + (q * TAU) / 3; ctx.beginPath(); ctx.arc(ix, iy, R * 0.74, a0, a0 + 1.3); ctx.stroke(); }
   ctx.globalCompositeOperation = 'source-over';
-  ctx.strokeStyle = 'rgba(30,0,4,0.92)'; ctx.lineWidth = R * 0.09; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.stroke();
-  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x, y, pr, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(30,0,4,0.92)'; ctx.lineWidth = R * 0.09; ctx.beginPath(); ctx.arc(ix, iy, R, 0, TAU); ctx.stroke();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(ix, iy, pr, 0, TAU); ctx.fill();
   ctx.restore();
   ctx.globalCompositeOperation = 'lighter';
   ctx.strokeStyle = `rgba(255,170,160,${0.6 * gain})`; ctx.lineWidth = Math.max(1, 0.006 * ppu);

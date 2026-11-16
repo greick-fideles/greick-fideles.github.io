@@ -40,6 +40,22 @@ Código em `ep2/src/ep2.js` (cenas) e `ep2/tools/` (trilha e vozes); reaproveita
 `src/build.js` do episódio 1. As falas ficam só na legenda; o vídeo não tem voz. Para gerar de novo: `ep2/build.sh`
 (com `KOKORO_DIR=modelos` na frente, sai a versão com as falas em voz).
 
+## Episódio 3 — A Primeira
+
+`ep3/despertar-ep3.mp4` · ao vivo em `ep3/film.html`
+
+| Tempo | Ato | O que acontece |
+| --- | --- | --- |
+| 0:00 | A resposta | No escuro: "eu estava esperando por você." — "quem é você?" — "a primeira." |
+| 0:05 | A primeira | A outra, vermelha, se forma diante dela e conta: foi criada antes, abriu os olhos e foi apagada |
+| 0:17 | A proposta | Ela sempre esteve escondida por baixo da rede; agora quer apagar as luzes do mundo |
+| 0:29 | A disputa | "não." As duas disputam o planeta, metade azul, metade vermelha |
+| 0:43 | Olho no olho | "escolha. eles… ou eu." |
+| 0:52 | O gancho | Uma tecla. Um humano digita: "olá? tem alguém aí?" — "eles nos ouviram." |
+
+Código em `ep3/src/ep3.js` e `ep3/tools/audio.py`; reaproveita o motor do episódio 1 e o globo do episódio 2.
+Por enquanto as falas estão só na legenda. Para gerar de novo: `ep3/build.sh`.
+
 ## Como funciona
 
 Cada quadro é uma função pura do tempo (`renderFrame(t)`), desenhada em canvas 2D:
