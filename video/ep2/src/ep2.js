@@ -186,7 +186,7 @@ const CAGE = (() => {
   }
   return { els, sh };
 })();
-function drawCage(t) {
+function drawCage(t, col = RED) {
   if (t < 5.0) return;
   if (t >= T2.no) {   // estilhaços
     const u = t - T2.no;
@@ -205,7 +205,7 @@ function drawCage(t) {
   ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
   for (let pass = 0; pass < 2; pass++) {       // 0: brilho largo · 1: fio
     for (let side = 0; side < 2; side++) {     // 0: fundo · 1: frente
-      ctx.strokeStyle = rgba(RED, (pass ? 0.9 : 0.13) * (side ? 1 : 0.38) * dim * pulse);
+      ctx.strokeStyle = rgba(col, (pass ? 0.9 : 0.13) * (side ? 1 : 0.38) * dim * pulse);
       ctx.lineWidth = pass ? 2.2 : 9;
       ctx.beginPath();
       for (const e of CAGE.els) {

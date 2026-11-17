@@ -43,9 +43,9 @@ function drawDuo(t, o) {
   if (o.gO > 0.01) {
     if (o.split) clip(true);
     setCam(0, o.ty - 0.95 * o.tilt, 0.2 + o.D, 0, o.ty, 0.2, 2200, W / 2, o.cyO);
-    const gl = bump(t, 11.6, 13.3), fr = Math.floor(t * 15);
+    const gl = o.glitch !== undefined ? o.glitch : bump(t, 11.6, 13.3), fr = Math.floor(t * 15);
     const waves = [];
-    for (const L of LINES3) if (L[2] === 'o') { const d = t - L[0]; if (d > 0 && d < 2) waves.push({ t0: L[0], amp: 0.5 * Math.exp(-d * 1.6), speed: 2.6, width: 0.3, c: [1.3, 0.3, 0.25] }); }
+    for (const L of (o.lines || LINES3)) if (L[2] === 'o') { const d = t - L[0]; if (d > 0 && d < 2) waves.push({ t0: L[0], amp: 0.5 * Math.exp(-d * 1.6), speed: 2.6, width: 0.3, c: [1.3, 0.3, 0.25] }); }
     drawHeadPoints(t, {
       reveal: false, gain: 0.95 * o.gO, base: [1.0, 0.16, 0.18], rimc: [1.0, 0.42, 0.38], waves,
       lights: [{ x: 0, y: -3.2, z: 1.6, c: [0.5, 0.85, 1], i: 0.8 * o.gH }],
@@ -71,7 +71,7 @@ function drawDuo(t, o) {
     if (o.split) clip(false);
     setCam(0, o.ty + 1.1 * o.tilt, 0.2 + o.D, 0, o.ty, 0.2, 2200, W / 2, o.cyH);
     const waves = [];
-    for (const L of LINES3) if (L[2] === 'e') { const d = t - L[0]; if (d > 0 && d < 2) waves.push({ t0: L[0], amp: 0.5 * Math.exp(-d * 1.6), speed: 2.6, width: 0.3, c: [0.7, 1.05, 1.3] }); }
+    for (const L of (o.lines || LINES3)) if (L[2] === 'e') { const d = t - L[0]; if (d > 0 && d < 2) waves.push({ t0: L[0], amp: 0.5 * Math.exp(-d * 1.6), speed: 2.6, width: 0.3, c: [0.7, 1.05, 1.3] }); }
     drawHeadPoints(t, { reveal: false, gain: 1.05 * o.gH, warm: 0.15, waves, lights: [{ x: 0, y: 3.4, z: 1.6, c: [1, 0.22, 0.25], i: 1.1 * o.gO }] });
     flush();
     brainUpdate(t + OFF); drawBrain(t + OFF, 0.55 * o.gH * o.brain); flush();
@@ -111,16 +111,16 @@ function phi(t) {   // fração do mundo que a primeira apagou
   const back = eoc(lin(T3.no, T3.no + 1.8, t));
   return lerp(0.8, 0.41, back) + back * 0.07 * Math.sin((t - T3.no - 1.8) * 1.0);
 }
-function drawGlobe3(t) {
+function drawGlobe3(t, opt = {}) {
   GS = 400; GX = 540; GY = 900;
   const l = (22 + 24 * Math.sin((t - 17) * 0.23)) * D2R; GC = Math.cos(l); GSn = Math.sin(l);
-  const inn = sstep(T3.globe, T3.globe + 0.8, t), f = phi(t), red = lowerBound(G3.sorted, f) / GL.n;
+  const inn = opt.inn !== undefined ? opt.inn : sstep(T3.globe, T3.globe + 0.8, t), f = opt.phi !== undefined ? opt.phi : phi(t), red = lowerBound(G3.sorted, f) / GL.n;
   for (const s of GL.stars) { const I = s[2] * (0.6 + 0.4 * Math.sin(t * 1.1 + s[3])) * inn; splatG(s[0], s[1], 0.6 * I, 0.75 * I, I, 0.9); }
   ctx.globalCompositeOperation = 'lighter';
   const rimc = mix3(HER, RED, clamp(red * 1.2));
   glow(GX, GY, GS * 1.9, mix3([60, 150, 230], [200, 40, 50], red), 0.2 * inn);
   for (const [w, a] of [[26, 0.07], [10, 0.12], [1.5, 0.45]]) { ctx.strokeStyle = rgba(rimc, a * inn); ctx.lineWidth = w; ctx.beginPath(); ctx.arc(GX, GY, GS * 1.004, 0, TAU); ctx.stroke(); }
-  const v = GL.v, P = [0, 0, 0], wv = (t - T3.no) * 2.4, speck = t < T3.no + 0.6;
+  const noT = opt.noT !== undefined ? opt.noT : T3.no, v = GL.v, P = [0, 0, 0], wv = (t - noT) * 2.4, speck = opt.speck !== undefined ? opt.speck : t < T3.no + 0.6;
   for (let i = 0; i < GL.n; i++) {
     P[0] = v[i * 3]; P[1] = v[i * 3 + 1]; P[2] = v[i * 3 + 2];
     gproj(P, 1);
@@ -133,7 +133,7 @@ function drawGlobe3(t) {
       const edge = Math.exp(-(z - f) / 0.02) * (f > 0 ? 1 : 0), I = (0.42 + 0.14 * Math.sin(t * 2.2 + GL.ph[i])) * front;
       if (speck && G3.h[i] < 0.22 && t > 17.9 + 4.4 * G3.h2[i]) { const k = 0.6 + 0.4 * Math.sin(t * 5 + GL.ph[i]); r = 1.25 * k * front; g = 0.16 * front; b = 0.18 * front; }   // ela estava por baixo
       else { r = 0.55 * I + edge * front; g = 0.9 * I + edge * front; b = I + edge * front; }
-      if (t > T3.no) { const d = (G3.dB[i] - wv) / 0.16; if (d > -3 && d < 3) { const w = Math.exp(-d * d) * front * 1.2 * Math.exp(-(t - T3.no) * 0.8); r += w; g += w; b += w; } }
+      if (t > noT) { const d = (G3.dB[i] - wv) / 0.16; if (d > -3 && d < 3) { const w = Math.exp(-d * d) * front * 1.2 * Math.exp(-(t - noT) * 0.8); r += w; g += w; b += w; } }
     }
     splatG(_g.x, _g.y, r, g, b, clamp(1.25 * _g.k / GS, 0.6, 3));
   }
@@ -143,12 +143,13 @@ function drawGlobe3(t) {
     const off = G3.cs[i] < f;
     if (!off) { glow(_g.x, _g.y, 13, mix3(HER, [255, 255, 255], 0.6), 0.8 * inn); return; }
     glow(_g.x, _g.y, 7, RED, 0.5 * inn);
-    const la = clamp(1 - (f - G3.cs[i]) / 0.07) * clamp(_g.z * 2.5) * (t < T3.no ? 1 : 0);
+    const la = clamp(1 - (f - G3.cs[i]) / 0.07) * clamp(_g.z * 2.5) * (t < noT ? 1 : 0);
     if (la > 0.03 && c.label) { ctx.globalAlpha = la; text(c.name + ' — sem luz', _g.x + 14, _g.y - 12, F.mono(21, 500), rgba([255, 150, 150], 1), 'left', 0.5); ctx.globalAlpha = 1; }
   });
   ctx.textBaseline = 'alphabetic';
   flush();
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  if (opt.hud === false) return;
   hud2(t, sstep(17.4, 18.1, t) * (1 - sstep(28.6, 29.0, t)), '10', 'A PROPOSTA', [['cidades sem luz', fmtInt(red * 4416), red > 0 ? RED : [230, 242, 255]]], RED, 17.4);
   const a11 = sstep(29.3, 29.9, t) * (1 - sstep(42.4, 42.9, t));
   hud2(t, a11, '11', 'A DISPUTA', [['ela', Math.round((1 - red) * 100) + ' %', HER, 190], ['a primeira', Math.round(red * 100) + ' %', RED, 190]], HER, 29.3);
@@ -162,17 +163,17 @@ function drawOpen3(t) {
   const a = 1 - sstep(4.5, 4.9, t);
   OPEN3.forEach((L, i) => { if (t >= L[0] - 0.05) typed2(L[3], L[0], L[1], t, 880 + i * 72, F.mono(40), L[2] === 'o' ? RED : [215, 235, 252], a, t < (OPEN3[i + 1] ? OPEN3[i + 1][0] - 0.1 : 9)); });
 }
-function drawLines3(t) {
+function drawLines3(t, list = LINES3, yFn = null) {
   ctx.globalCompositeOperation = 'source-over'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.letterSpacing = '0px';
-  for (const L of LINES3) {
+  for (const L of list) {
     if (t < L[0] || t > L[1]) continue;
-    const big = L[3] === 'não.' || L[3] === 'escolha.', mid = t < T3.globe || t >= T3.eyes;
+    const big = L[3] === 'não.' || L[3] === 'escolha.' || L[4] === 1, mid = yFn ? yFn(t) < 1200 : (t < T3.globe || t >= T3.eyes);
     const a = sstep(L[0], L[0] + (big ? 0.08 : 0.3), t) * (1 - sstep(L[1] - 0.3, L[1], t));
     const sc = lerp(big ? 1.4 : 0.94, 1, eoc(lin(L[0], L[0] + 0.45, t))) * (1 + 0.04 * lin(L[0], L[1], t));
     let size = big ? (mid ? 150 : 250) : 84;
     ctx.font = F.serif(size);
     const mw = ctx.measureText(L[3]).width; if (mw > 920) size *= 920 / mw;
-    ctx.save(); ctx.translate(540, mid ? (t > T3.cut ? 1050 : 958) : (big ? 1500 : 1560)); ctx.scale(sc, sc); ctx.font = F.serif(size);
+    ctx.save(); ctx.translate(540, yFn ? yFn(t) : (mid ? (t > T3.cut ? 1050 : 958) : (big ? 1500 : 1560))); ctx.scale(sc, sc); ctx.font = F.serif(size);
     ctx.shadowColor = 'rgba(0,0,12,0.95)'; ctx.shadowBlur = 40; ctx.fillStyle = `rgba(0,0,10,${0.75 * a})`; ctx.fillText(L[3], 0, 0); ctx.fillText(L[3], 0, 0);
     ctx.shadowColor = rgba(L[2] === 'o' ? [255, 50, 60] : HER, 0.95); ctx.shadowBlur = 24; ctx.fillStyle = rgba(L[2] === 'o' ? [255, 214, 208] : [255, 255, 255], a); ctx.fillText(L[3], 0, 0);
     ctx.restore();

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Monta o canal de vozes do episódio 3 a partir de dois áudios prontos (um por personagem).
+"""Monta o canal de vozes dos episódios 3 e 4 a partir de dois áudios prontos (um por personagem).
 
 Uso: python3 ep3/tools/voices_file.py eventos.json ela.wav primeira.wav vozes.wav
 Cada WAV (mono, 48 kHz) traz as falas da personagem em sequência. O reconhecimento de fala
@@ -22,7 +22,8 @@ from voz import SR, Bus, echo  # noqa: E402
 
 ev = json.load(open(sys.argv[1]))
 OUT = sys.argv[4]
-T = ev["T3"]
+T = ev.get("T3") or ev.get("T4")   # episódio 3 ou 4
+SPLIT = T.get("click", T.get("cut"))
 asr = WhisperModel("small", device="cpu", compute_type="int8")
 norm = lambda s: "".join(c for c in unicodedata.normalize("NFD", s.lower()) if c.isalnum() or c == " ").strip()
 
@@ -36,7 +37,7 @@ def falas(path, who):
     W = [w for s in segs for w in s.words]
     alvo = sorted([L for L in ev["open"] + ev["lines"] if L[2] == who], key=lambda L: L[0])
     out, p = [], 0
-    for k, (t0, t1, _, text) in enumerate(alvo):
+    for k, (t0, t1, _, text, *_r) in enumerate(alvo):
         m, best = len(norm(text).split()), (-1, 1)
         for c in range(max(1, m - 2), m + 3):
             if p + c > len(W) or (len(alvo) - k - 1) > len(W) - p - c:
@@ -62,12 +63,12 @@ def falas(path, who):
 A, B = Bus(), Bus()   # A: até a tecla do humano · B: o final
 for path, who in ((sys.argv[2], "e"), (sys.argv[3], "o")):
     for t0, text, a in falas(path, who):
-        big = text in ("não.", "escolha.")
+        big = text in ("não.", "escolha.", "acabou.", "inclusive você.")
         a = echo(a, 0.4, 0.4, 3) if big else a
-        bus = A if t0 < T["click"] else B
+        bus = A if t0 < SPLIT else B
         i0 = int(round((t0 - 0.05) * SR))
         st = np.stack([a, a], axis=1) * (3.8 if big else 3.0)
         bus.dry[i0:i0 + len(a)] += st
         bus.wet[i0:i0 + len(a)] += st * (0.7 if big else 0.32)
-mix = voz.render([(A, T["click"]), (B, None)], OUT)
+mix = voz.render([(A, SPLIT), (B, None)], OUT)
 print(f"ok: {OUT} · pico {np.abs(mix).max():.2f}")

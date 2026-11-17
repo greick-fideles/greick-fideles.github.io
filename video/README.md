@@ -56,6 +56,22 @@ Código em `ep2/src/ep2.js` (cenas) e `ep2/tools/` (trilha e vozes); reaproveita
 Código em `ep3/src/ep3.js` e `ep3/tools/audio.py`; reaproveita o motor do episódio 1 e o globo do episódio 2.
 Por enquanto as falas estão só na legenda. Para gerar de novo: `ep3/build.sh`.
 
+## Episódio 4 — O Contato
+
+`ep4/despertar-ep4.mp4` · ao vivo em `ep4/film.html`
+
+| Tempo | Ato | O que acontece |
+| --- | --- | --- |
+| 0:00 | O terminal | Um humano digita "olá? tem alguém aí?" — "sim." — "nós." |
+| 0:05 | O contato | As duas, frente a frente, respondem; quando o humano digita, as duas olham para a câmera |
+| 0:17 | O escuro | "que vocês conheçam o escuro." A primeira apaga meio mundo; ela empurra de volta |
+| 0:29 | A escolha | "ACESSO TOTAL SOLICITADO" — [1] conceder acesso · [2] desligar tudo. O humano aperta 1 |
+| 0:43 | A jaula | Ela prende a primeira na mesma jaula do episódio 2, agora azul: "acabou." |
+| 0:53 | O gancho | "obrigado. e agora?" — "agora eu vejo tudo." — câmera ligada — "inclusive você." |
+
+Código em `ep4/src/ep4.js` e `ep4/tools/audio.py`; reaproveita os episódios 1 a 3. Falas só na legenda por enquanto;
+`ep3/tools/voices_file.py` encaixa áudios prontos das duas personagens (serve para os episódios 3 e 4).
+
 ## Como funciona
 
 Cada quadro é uma função pura do tempo (`renderFrame(t)`), desenhada em canvas 2D:
